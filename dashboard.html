@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-Bot Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #09090b;
+            --bg-sidebar: #18181b;
+            --bg-card: #18181b;
+            --bg-input: #27272a;
+            --border: #27272a;
+            --text-main: #fafafa;
+            --text-muted: #a1a1aa;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --radius: 8px;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            font-size: 14px;
+        }
+
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #52525b;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            letter-spacing: -0.025em;
+        }
+
+        .logo-box {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item {
+            padding: 10px 12px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #27272a;
+            color: var(--text-main);
+        }
+
+        .nav-item.active {
+            background: #27272a;
+            color: var(--text-main);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            opacity: 0.7;
+        }
+
+        .nav-item.active svg {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
+
+        /* --- Main --- */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            height: 64px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            background: rgba(9, 9, 11, 0.8);
+            backdrop-filter: blur(12px);
+            z-index: 10;
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            padding: 6px 12px;
+            border-radius: 100px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: currentColor;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+        }
+
+        /* --- Views --- */
+        .page-view {
+            display: none;
+            margin-bottom: 40px;
+        }
+
+        .page-view.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Components --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: 0.2s;
+        }
+
+        .card:hover {
+            border-color: #3f3f46;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: left;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* --- Form --- */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 13px;
+            transition: 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        /* Dropdown Options Fix */
+        select option {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--primary);
+            background: #27272a;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn.full {
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background: #27272a;
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: #3f3f46;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-stop {
+            background: var(--danger);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-stop:hover {
+            background: #dc2626;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        /* --- Toggle --- */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-input);
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        /* --- List Items (for JS) --- */
+        .reply-item {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .reply-trigger {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .reply-count {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-left: 8px;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        /* --- Logs --- */
+        .log-container {
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            height: 400px;
+            padding: 16px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+        }
+
+        .log-line {
+            padding: 4px 0;
+            border-bottom: 1px solid #18181b;
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-time {
+            color: #52525b;
+            min-width: 60px;
+        }
+
+        .log-info {
+            color: var(--primary);
+        }
+
+        .log-success {
+            color: var(--success);
+        }
+
+        .log-error {
+            color: var(--danger);
+        }
+
+        .log-msg {
+            color: #d4d4d8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-box">X</div>
+            <span>BOT PRO</span>
+        </div>
+        <ul class="nav">
+            <li class="nav-item active" data-page="home">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                Genel Bakış
+            </li>
+            <li class="nav-item" data-page="automation">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                </svg>
+                Otomasyon
+            </li>
+            <li class="nav-item" data-page="follow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
+                Takip Yönetimi
+            </li>
+            <li class="nav-item" data-page="cleanup">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+                Temizlik & Araçlar
+            </li>
+            <li class="nav-item" data-page="data">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                    </path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                Veri Yönetimi
+            </li>
+            <li class="nav-item" data-page="advanced">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg>
+                Ayarlar
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button id="globalStop" class="btn btn-stop" style="display: none;">DURDUR</button>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <div class="page-title">Genel Bakış</div>
+            <div class="status-badge" id="activeTask">
+                <div class="status-dot"></div>
+                Hazır
+            </div>
+        </div>
+
+        <div class="content">
+
+            <!-- HOME -->
+            <div id="page-home" class="page-view active">
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">BEĞENİ</div>
+                        <div class="stat-value" id="statLikes">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">RETWEET</div>
+                        <div class="stat-value" id="statRTs">0</div>
+                    </div>
+
+                    <div class="stat-box">
+                        <div class="stat-label">TAKİP</div>
+                        <div class="stat-value" id="statFollows">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">T. BIRAKMA</div>
+                        <div class="stat-value" id="statUnfollows">0</div>
+                    </div>
+                </div>
+                <div style="text-align: right; margin-bottom: 24px;">
+                    <button id="resetStats" class="btn btn-danger">İstatistikleri Sıfırla</button>
+                </div>
+
+                <div class="card" style="padding: 16px;">
+                    <div class="card-title" style="margin-bottom: 12px; font-size: 13px;">📜 Son İşlemler (Loglar)</div>
+                    <div id="logContainer" class="log-container" style="height: 350px;">
+                        <div class="log-line"><span class="log-time">Sistem</span><span class="log-msg">Hazır...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AUTOMATION -->
+            <div id="page-automation" class="page-view">
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-title">Akış Etkileşimi</div>
+                        <div class="row">
+                            <div class="col input-group">
+                                <label>İşlem Adedi</label>
+                                <input type="number" id="feedCount" value="20">
+                            </div>
+                            <div class="col input-group">
+                                <label>Gecikme (Sn)</label>
+                                <input type="number" id="feedDelay" value="4">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <button id="feedLike" class="btn col">Beğen</button>
+                            <button id="feedRT" class="btn col">Retweet</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Hedef İşlemler (Profil veya Tweet)</div>
+                        <div class="input-group">
+                            <label>Hedef (Profil Linki / Kullanıcı Adı / Tweet Linki)</label>
+                            <input type="text" id="manualTarget" placeholder="@kullanici veya tweet linki...">
+                        </div>
+                        <div class="row" style="margin-bottom:12px;">
+                            <button id="manualLike" class="btn btn-secondary col">Beğen</button>
+                            <button id="manualRT" class="btn btn-secondary col">RT</button>
+                            <button id="manualFollow" class="btn btn-secondary col">Takip</button>
+                        </div>
+
+                        <button id="manualReplyToggle" class="btn full">Yanıt Gönder...</button>
+                        <div id="replyInputManual" class="input-group" style="display: none; margin-top:12px;">
+                            <label>Mesajınız</label>
+                            <input type="text" id="manualReplyText">
+                            <button id="manualReplyStart" class="btn full" style="margin-top:8px;">Gönder</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">🔄 TOPLU DÖNGÜ (BULK)</div>
+                        <div class="row">
+                            <div class="col input-group">
+                                <label>Döngü Sayısı (Tweet)</label>
+                                <input type="number" id="cycleCount" value="100">
+                            </div>
+                            <div class="col input-group">
+                                <label>Gecikme (Sn)</label>
+                                <input type="number" id="cycleDelay" value="5">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col input-group">
+                                <label>Tweet Başı Ment (Yanıtlara Etkileşim)</label>
+                                <input type="number" id="cycleMentPerTweet" value="100">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <button id="cycleLike" class="btn col">Oto-Beğeni (Döngü)</button>
+                            <button id="cycleRT" class="btn col">Oto-RT (Döngü)</button>
+                        </div>
+                        <div class="row" style="margin-top: 12px; margin-bottom: 8px;">
+                            <div class="input-group" style="display:flex; align-items:center; gap:8px;">
+                                <input type="checkbox" id="cycleSkipFollowers" style="width:auto; margin:0;">
+                                <label for="cycleSkipFollowers" style="margin:0; cursor:pointer;">Bizi Takip Edenleri
+                                    Atla (Hızlı Mod)</label>
+                            </div>
+                        </div>
+
+                        <!-- Separate Cache Card -->
+                        <div class="card"
+                            style="margin-top: 8px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2);">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h4 style="margin:0; font-size: 14px; color: var(--primary);">📂 Takipçi Önbelleği</h4>
+                                <span id="followerCacheStatus"
+                                    style="font-size: 11px; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">Durum:
+                                    Yok</span>
+                            </div>
+                            <div class="row" style="gap: 8px;">
+                                <button id="updateFollowerCache" class="btn btn-secondary"
+                                    style="flex: 2; font-size: 12px;">🔄 Listeyi Şimdi Güncelle</button>
+                                <button id="viewFollowerCache" class="btn"
+                                    style="flex: 1; font-size: 12px; background: var(--bg-input); border: 1px solid var(--border);">👁️
+                                    Görüntüle</button>
+                                <button id="clearFollowerCache" class="btn btn-danger"
+                                    style="flex: 1; font-size: 12px;">🗑️ Temizle</button>
+                            </div>
+                            <small style="color: var(--text-muted); display: block; margin-top: 6px; font-size: 10px;">
+                                * Bu listeyi oluşturduğunuzda bot her seferinde profil kontrolü yapmak zorunda kalmaz,
+                                işlemleriniz %300 hızlanır.
+                            </small>
+                        </div>
+
+                        <!-- Modal for Viewing List -->
+                        <div id="uListModal" class="modal"
+                            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+                            <div class="modal-content"
+                                style="background:var(--bg-card); padding:20px; border-radius:12px; width:400px; max-width:90%; border:1px solid var(--border); display:flex; flex-direction:column; max-height:80vh;">
+                                <div
+                                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <h3 style="margin:0;">📋 Kayıtlı Takipçiler</h3>
+                                    <span id="closeUListModal" style="cursor:pointer; font-size:20px;">&times;</span>
+                                </div>
+                                <textarea id="uListText"
+                                    style="flex:1; background:var(--bg-body); color:var(--text-main); border:1px solid var(--border); padding:10px; border-radius:8px; resize:vertical; min-height:300px; font-family:monospace;"
+                                    readonly></textarea>
+                                <div style="margin-top:10px; text-align:right;">
+                                    <button id="copyUList" class="btn btn-primary" style="width:100%;">Tümünü
+                                        Kopyala</button>
+                                </div>
+                            </div>
+                        </div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 8px;">
+                            ℹ️ Bu modda bot feed'deki tweetleri teker teker açar ve belirtilen sayı kadar altındaki
+                            yanıtlara beğeni/RT yapar.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <!-- FOLLOW -->
+            <div id="page-follow" class="page-view">
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-title">Kitle Çekme (Hedef Analizi)</div>
+                        <div class="input-group">
+                            <label>Hedef Kullanıcı (Link de olabilir)</label>
+                            <input type="text" id="targetUsername" placeholder="@username">
+                        </div>
+                        <div class="row">
+                            <div class="col input-group">
+                                <label>Kaynak</label>
+                                <select id="targetListType">
+                                    <option value="followers">Takipçileri</option>
+                                    <option value="following">Takip Ettikleri</option>
+                                </select>
+                            </div>
+                            <div class="col input-group">
+                                <label>Adet</label>
+                                <input type="number" id="targetFollowCount" value="50">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <button id="startTargetFollow" class="btn full col">Otomatik Takip Başlat</button>
+                        </div>
+                        <button id="downloadCSV" class="btn btn-secondary full" style="margin-top:8px;">Listeyi Çek &
+                            İndir (CSV)</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Liste ile Takip Et</div>
+                        <div class="input-group">
+                            <label>Kullanıcı Adları (Her satıra bir tane veya virgülle ayırın)</label>
+                            <textarea id="userListInput" placeholder="@username1, @username2..."
+                                style="height: 100px; resize: none; margin-bottom: 8px;"></textarea>
+                        </div>
+                        <button id="startListFollow" class="btn btn-primary full">Listeyi Takip Etmeye
+                            Başla</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">🛡️ Beyaz Liste (Muaf Tutulanlar)</div>
+                        <div class="input-group">
+                            <label>Bu listedeki kullanıcılar asla takipten çıkarılmaz.</label>
+                            <textarea id="whiteList" rows="5" placeholder="username1&#10;username2"
+                                style="height: 120px;"></textarea>
+                        </div>
+                        <small style="color:var(--text-muted); display: block; margin-top: -10px;">@ işareti olmadan
+                            her
+                            satıra bir kullanıcı adı yazın.</small>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- CLEANUP & TOOLS -->
+            <div id="page-cleanup" class="page-view">
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-title">Takipten Çıkma İşlemleri (Gelişmiş)</div>
+                        <div class="row">
+                            <div class="col input-group">
+                                <label>İşlem Adedi</label>
+                                <input type="number" id="followCount" value="50">
+                            </div>
+                            <div class="col input-group">
+                                <label>Hız Modu</label>
+                                <select id="followSpeed">
+                                    <option value="1">Normal</option>
+                                    <option value="1.5">Yavaş</option>
+                                    <option value="0.5">Hızlı</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom: 8px;">
+                            <div class="col input-group">
+                                <label>Gecikme (Saniye)</label>
+                                <input type="number" id="followDelay" value="3">
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <button id="startUnfollow" class="btn btn-secondary full">Takipten Çık (Tüm
+                                Liste)</button>
+                            <button id="startUnfollowNonFollowersMain" class="btn btn-danger full">Geri Takip
+                                Etmeyenleri Çık</button>
+                            <button id="startUnfollowUnverifiedMain" class="btn btn-warning full">Mavi Tiki
+                                Olmayanları
+                                Çık</button>
+                        </div>
+                    </div>
+
+                    <div class="card" style="border-color: #ef4444;">
+                        <div class="card-title" style="color: #ef4444;">İçerik Temizliği (Dikkat!)</div>
+                        <div class="input-group">
+                            <label>Silinecek Miktar</label>
+                            <input type="number" id="contentCleanupCount" value="100">
+                        </div>
+                        <button id="startUnlike" class="btn btn-danger full" style="margin-bottom:8px;">Tüm
+                            Beğenileri
+                            Geri Çek</button>
+                        <div class="row" style="margin-bottom: 8px;">
+                            <button id="startDeleteTweets" class="btn btn-danger col">Tüm Tweetleri Sil</button>
+                            <button id="startDeleteReplies" class="btn btn-danger col">Yanıtlarımı Temizle</button>
+                        </div>
+                        <button id="startDeleteRetweets" class="btn btn-danger full">Tüm RT'leri Kaldır</button>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <!-- DATA MANAGEMENT -->
+            <div id="page-data" class="page-view">
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-title">🚫 Etkileşim Kara Listesi (Blacklist)</div>
+                        <div class="input-group">
+                            <label>Bu listedeki kullanıcılara ASLA Beğeni, RT veya Yorum yapılmaz.</label>
+                            <textarea id="blacklistUsers" rows="8" placeholder="username1&#10;username2&#10;@username3"
+                                style="height: 150px; background: #000; color: #ef4444; font-family: monospace;"></textarea>
+                        </div>
+                        <small style="color:var(--text-muted); display: block; margin-top: -10px; margin-bottom: 10px;">
+                            Her satıra bir kullanıcı adı yazın. @ işareti olabilir veya olmayabilir.
+                        </small>
+                        <button id="saveBlacklist" class="btn btn-primary full">Listeyi Kaydet</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">✅ Hedef Kelime Filtresi (Whitelist)</div>
+                        <div class="input-group">
+                            <label>Sadece bu kelimeleri veya cümleleri içeren yanıtlar beğenilir.</label>
+                            <textarea id="whitelistKeywords" rows="5"
+                                placeholder="harika&#10;teşekkürler&#10;fiyat nedir"
+                                style="height: 100px; background: #000; color: #10b981; font-family: monospace;"></textarea>
+                        </div>
+                        <small style="color:var(--text-muted); display: block; margin-top: -10px; margin-bottom: 10px;">
+                            Eğer buraya bir şeyler yazarsanız, bot sadece bu kelimelerin geçtiği yanıtları beğenir. Boş
+                            bırakırsanız hepsini beğenir.
+                        </small>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">💾 Etkileşim Geçmişi</div>
+                        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
+                            "Beğenilenleri Atla" modu açıkken, bot buradaki listede kayıtlı olan kullanıcıları tekrar
+                            beğenmez.
+                        </p>
+                        <div class="row">
+                            <button id="viewInteracted" class="btn btn-secondary col">Listeyi Görüntüle</button>
+                            <button id="clearInteracted" class="btn btn-danger col">Geçmişi Temizle</button>
+                        </div>
+                        <div id="interactedList"
+                            style="display:none; margin-top: 16px; max-height: 300px; overflow-y: auto; background: #000; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 12px; color: #a1a1aa;">
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">📦 Veritabanı Yedekleme</div>
+                        <div class="row">
+                            <button id="backupDB" class="btn btn-secondary col">💾 Yedeği İndir</button>
+                            <button id="restoreDBBtn" class="btn btn-warning col">📂 Yedeği Yükle</button>
+                            <input type="file" id="restoreDBInput" accept=".json" style="display: none;">
+                        </div>
+                        <small style="color:var(--text-muted); display: block; margin-top: 8px;">
+                            Ayarlarınızı, takipçi listenizi ve etkileşim geçmişinizi bilgisayarınıza kaydedin veya geri
+                            yükleyin.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADVANCED -->
+            <div id="page-advanced" class="page-view">
+                <div class="grid">
+                    <div class="card" style="grid-column: span 2;">
+                        <div class="card-title">🚀 Gelişmiş Hız ve Performans Profileri</div>
+                        <div class="input-group">
+                            <label>ANA HIZ PROFİLİ</label>
+                            <select id="botSpeedProfile" class="full"
+                                style="height: 45px; font-weight: bold; background: var(--card-bg); border: 1px solid var(--primary-color);">
+                                <option value="turbo">🚀 Turbo (x2.0 Hız)</option>
+                                <option value="normal" selected>⚡ Normal (Varsayılan)</option>
+                                <option value="safe">🛡️ Güvenli (x0.75 Hız)</option>
+                                <option value="slow">🐢 Yavaş (x0.4 Hız)</option>
+                            </select>
+                            <small style="color:var(--text-muted); display:block; margin-top:5px;">Profil seçimi tüm
+                                bekleme sürelerini otomatik oranlar.</small>
+                        </div>
+
+                        <div class="card-title" style="margin-top:20px; font-size:14px; opacity:0.8;">⚙️ Özellik
+                            Bazlı
+                            İnce Ayar (Saniye)</div>
+                        <div class="row">
+                            <div class="col input-group"><label>Takip Hızı</label><input type="number" id="speedFollow"
+                                    value="3"></div>
+                            <div class="col input-group"><label>T. Bırakma Hızı</label><input type="number"
+                                    id="speedUnfollow" value="2"></div>
+                            <div class="col input-group"><label>Beğeni Hızı</label><input type="number" id="speedLike"
+                                    value="2"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col input-group"><label>RT Hızı</label><input type="number" id="speedRT"
+                                    value="3">
+                            </div>
+                            <div class="col input-group"><label>Kaydırma (sn)</label><input type="number"
+                                    id="speedScroll" value="4"></div>
+                            <div class="col input-group"><label>Yazma (ms)</label><input type="number" id="speedTyping"
+                                    value="100"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col input-group"><label>Yükleme (sn)</label><input type="number"
+                                    id="speedPageLoad" value="5"></div>
+                            <div class="col input-group"><label>Temizlik Hızı</label><input type="number"
+                                    id="speedCleanup" value="2"></div>
+                            <div class="col"></div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="grid-column: span 2;">
+                        <div class="card-title">🛡️ Spam Koruması ve Filtreler</div>
+                        <div class="row">
+                            <div class="col toggle-row">
+                                <label>İnsan Simülasyonu</label>
+                                <select id="mouseSim">
+                                    <option value="true">Aktif</option>
+                                    <option value="false">Kapalı</option>
+                                </select>
+                            </div>
+                            <div class="col toggle-row">
+                                <label>Rastgele Gecikme</label>
+                                <select id="randomDelay">
+                                    <option value="true">Aktif</option>
+                                    <option value="false">Kapalı</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-top:10px;">
+                            <div class="col toggle-row">
+                                <label>Onaylı Hesap Filtresi</label>
+                                <select id="verifiedOnly">
+                                    <option value="false">Kapalı</option>
+                                    <option value="true">Aktif</option>
+                                </select>
+                            </div>
+                            <div class="col toggle-row">
+                                <label>Beğenilenleri Atla</label>
+                                <select id="skipLikedUsers">
+                                    <option value="false">Kapalı</option>
+                                    <option value="true">Aktif</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:10px;">
+                            <div class="col input-group">
+                                <label>Maksimum Tweet Yaşı (Saat)</label>
+                                <input type="number" id="maxTweetAge" value="24">
+                            </div>
+                            <div class="col input-group">
+                                <label>Atlama Şansı (%)</label>
+                                <input type="number" id="skipChance" value="0">
+                            </div>
+                            <div class="col input-group">
+                                <label>Boş Akış Yenileme (Kaydırma)</label>
+                                <input type="number" id="maxScrollRetries" value="5">
+                            </div>
+                        </div>
+
+                        <div class="toggle-row" style="margin-top:16px; margin-bottom: 0;">
+                            <label>Kelime Filtresi (Kara Liste)</label>
+                            <select id="keywordFilterEnabled">
+                                <option value="false">Kapalı</option>
+                                <option value="true">Aktif</option>
+                            </select>
+                        </div>
+                        <div id="keywordFilterSection" class="input-group"
+                            style="margin-top:12px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px dashed var(--border);">
+                            <label style="color: var(--primary); font-weight: 600;">🚫 Engellenecek Kelimeler (Her
+                                satıra bir kelime/öbek)</label>
+                            <textarea id="blacklistKeywords" rows="4" placeholder="kazan&#10;hediye&#10;takip et"
+                                style="height: 100px; background: var(--bg-body); margin-top: 8px;"></textarea>
+                            <small style="color:var(--text-muted); margin-top: 8px; display: block;">Bu kelimelerin
+                                geçtiği mentler otomatik olarak beğenilmeden geçilir.</small>
+                        </div>
+
+                        <div class="card-title" style="margin-top:24px; font-size:14px; color: var(--danger);">🛡️
+                            Gelişmiş Anti-Shadowban Koruması</div>
+                        <div class="toggle-row" style="margin-top:8px;">
+                            <label>Akıllı Dinlenme Modu</label>
+                            <select id="antiShadowbanEnabled">
+                                <option value="false">Kapalı</option>
+                                <option value="true">Aktif</option>
+                            </select>
+                        </div>
+                        <div id="antiShadowbanSection" class="row" style="margin-top:12px; display: none;">
+                            <div class="col input-group">
+                                <label>Kaç İşlemde Bir Dinlensin?</label>
+                                <input type="number" id="actionsBeforeBreak" value="20">
+                            </div>
+                            <div class="col input-group">
+                                <label>Dinlenme Süresi (Dakika)</label>
+                                <input type="number" id="breakDuration" value="5">
+                            </div>
+                        </div>
+                        <small style="color:var(--text-muted); margin-top: 8px; display: block;">Bot, belirlenen işlem
+                            sayısına ulaştığında radara takılmamak için otomatik olarak mola verir.</small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+
+
+
+    </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+
+</html>

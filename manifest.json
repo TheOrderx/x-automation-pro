@@ -1,0 +1,37 @@
+{
+    "manifest_version": 3,
+    "name": "X-Otomasyon Botu",
+    "version": "3.5",
+    "description": "Twitter işlemlerini tarayıcı üzerinden otomatikleştirir.",
+    "permissions": [
+        "storage",
+        "tabs",
+        "scripting",
+        "activeTab",
+        "cookies",
+        "unlimitedStorage",
+        "webRequest"
+    ],
+    "host_permissions": [
+        "https://twitter.com/*",
+        "https://x.com/*",
+        "https://generativelanguage.googleapis.com/*"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://twitter.com/*",
+                "https://x.com/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ]
+}
